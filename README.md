@@ -6,7 +6,7 @@ Inhalt dieses Repository sind die Entstandenen Softwarepackete. Diese Enthalten 
 
 Folgende Regeln sind bei der Verwendung zu beachten: 
 
-1. jeder Nutzer muss seinen eigenen Branch anlegen und Verwenden
+1. jeder Nutzer muss seinen eigenen Branch anlegen und verwenden
 2. Pull requests werden nur nach Absprache des Verwalters durchgeführt. 
 3. Das Repository ist von jedem Softwareentwicklung ausgibig zu verwenden. 
 4. Pulls sollten regelmäsig durchgeführt werden. 
