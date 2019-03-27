@@ -1,4 +1,4 @@
-# Veleon_Software
+# Veleon_Project 
 Dieses Repository beinhaltet die Softwarepackete des Veleon-Projektes. 
 Die Software und Inhalte sind Eigentum der Hochschule Heilbronn Fakultät T1 und dürfen nicht ohne zustimmung der Hochschule veröffentlicht oder Verbreitet werden. 
 Das Veleon-Projekt besetht aus einem Lastenfahrad, welches mit dem Ziel ausgerichtet ist, dieses Autonom bewegen zu können. 
