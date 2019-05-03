@@ -1,2 +1,2 @@
-
--DCATKIN_DEVEL_PREFIX=/home/pi/Veleon_Project/catkin_ws/devel -DCMAKE_INSTALL_PREFIX=/home/pi/Veleon_Project/catkin_ws/install -G Unix Makefiles
+core_pkg
+-DCATKIN_DEVEL_PREFIX=/home/andreas/Veleon_Project/catkin_ws/devel -DCMAKE_INSTALL_PREFIX=/home/andreas/Veleon_Project/catkin_ws/install -G Unix Makefiles
