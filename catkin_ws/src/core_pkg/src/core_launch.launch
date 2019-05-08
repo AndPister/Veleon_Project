@@ -1,0 +1,3 @@
+<launch>
+    <node name="core_launch_node" pkg="core_pkg" type="talker">
+</launch>
