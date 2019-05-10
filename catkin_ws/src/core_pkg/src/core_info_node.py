@@ -1,19 +1,33 @@
 #!/usr/bin/env python
 import rospy
-from std_msgs.msg import String
+import psutil
+from std_msgs.msg import Float32
+
+
+
+def core_info(pub_core,pup_mem,spintime):
+#Publish core infos
+#CPU-usage RAM-usage
+        rate = rospy.rate(spintime)
+        core_usage = psutil.cpu_percent()
+        rospy.loginfo(core_usage)
+        pub.publish(core_usage)
+
+def check_core_release()
+        return True
 
 def main():
-    pub = rospy.Publisher('chatter', String, queue_size=10)
-    rospy.init_node('core_info_node', anonymous=True)
-    rate = rospy.Rate(10) # 10hz
-    while not rospy.is_shutdown():
-        hello_str = "hello world %s" % rospy.get_time()
-        rospy.loginfo(hello_str)
-        pub.publish(hello_str)
-        rate.sleep()
-    
-
+        pub_core = rospy.Publisher('/core_info_node/core_usage', Float32, queue_size=10)
+        pub_memory= rospy.Publisher('/core_info_node/core_usage', Float32, queue_size=10)
+        rospy.init_node('core_info_node', anonymous=True)
+        while not rospy.is_shutdown():
+                if check_core_release():
+                        core_info(pub_core=pub_core,pub_memory=pub_memory,10)
+                
 
 if __name__=="__main__":
-    main()
+        try:
+                main()
+        except:
+                rospy.loginfo("Error while running core_info_node")
 
