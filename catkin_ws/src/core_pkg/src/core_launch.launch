@@ -1,3 +1,4 @@
 <launch>
+    <param name="/core_info/core_info_enable" value="True"/>
     <node name="core_info_node" pkg="core_pkg" type="core_info_node.py"/>
 </launch>
