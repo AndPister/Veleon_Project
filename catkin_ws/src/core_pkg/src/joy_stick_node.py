@@ -1,10 +1,11 @@
-from pygame
+#!/usr/bin/env python
 import rospy
+import pygame
 from geometry_msgs.msg import Twist
 
 node_type_name = "/joy_stick_node"
 pub_twist_name = "/tele_op"
-para_joystic_con_name ="/controller_connected"
+para_joystick_con_name ="/controller_connected"
 para_autonomus_name = "/autonomDrive"
 para_stop_name = "/stopp"
 para_em_stop_name = "/emergancy_stop"
@@ -15,9 +16,9 @@ nr_em_stop_button = 3
 nr_rot_axis =1
 nr_trans_axsis = 3
 
-autonomus_button_old# = False
-stop_button_old# = False
-em_stop_button_old# = False
+autonomus_button_old = False
+stop_button_old = False
+em_stop_button_old = False
 
 max_translat_speed = 6 #m/s
 max_rot_speed = 6 #m/s
@@ -54,31 +55,31 @@ def set_param(Joystick):
         stop_button_old = not stop_button_old
         rospy.set_param(para_stop_name, str(stop_button_old))
 
-def get_first_param():
-    '''
-    Checks if the parameter are published and set the start value
-    '''
-
-    rospy.loginfo("Initial parameter checkup ")
-
-
-    if rospy.has_param(para_autonomus_name):
-        autonomus_button_old = rospy.get_param(para_autonomus_name) 
-    else:
-        rospy.logwarn(para_autonomus_name + "couldn’t be found: Using default Value")
-        autonomus_button_old = False
-    
-    if rospy.has_param(para_stop_name):
-        stop_button_old = rospy.get_param(para_stop_name)
-    else:
-        rospy.logwarn(para_stop_name + "couldn’t be found: Using default Value")
-        stop_button_old = False
-        
-    if rospy.has_param(para_em_stop_name):
-        em_stop_button_old = rospy.get_param(para_em_stop_name)
-    else:
-        rospy.logwarn(para_em_stop_name + "couldn’t be found: Using default Value")
-        em_stop_button_old = False
+#def get_first_param():
+ #   '''
+  #  Checks if the parameter are published and set the start value
+   # '''
+#
+ #   rospy.loginfo("Initial parameter checkup ")
+#
+#
+ #   if rospy.has_param(para_autonomus_name):
+  #      autonomus_button_old = rospy.get_param(para_autonomus_name) 
+   # else:
+    #    #rospy.loginfo(para_autonomus_name + "couldn’t be found: Using default Value")
+     #   autonomus_button_old = False
+    #
+    #if rospy.has_param(para_stop_name):
+    #    stop_button_old = rospy.get_param(para_stop_name)
+    #else:
+    #    #rospy.logwarn(para_stop_name + "couldn’t be found: Using default Value")
+    #    stop_button_old = False
+    #    
+    #if rospy.has_param(para_em_stop_name):
+    #    em_stop_button_old = rospy.get_param(para_em_stop_name)
+    #else:
+    #    #rospy.logwarn(para_em_stop_name + "couldn’t be found: Using default Value")
+     #   em_stop_button_old = False
 
 def main():
     '''
@@ -95,7 +96,7 @@ def main():
     Joystick = pygame.joystick.Joystick(0)
     Joystick.init()
 
-    rospy.set_param(para_joystic_con,"True")
+    rospy.set_param(para_joystick_con,"True")
 
     get_first_param()#geting first paramsetting from ROS-network
 
