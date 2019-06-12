@@ -36,6 +36,6 @@ echo -e $_IMPORTSTRING >> ~/.bashrc
 echo "Install Joy-Package"
 #installing Joy_pkg for Connecting to to xBox-controler
 sudo apt-get install ros-kinetic-joy
-sudo chmod a+rw /dev/input/js0
+#sudo chmod a+rw /dev/input/js0
 
 exit 0
