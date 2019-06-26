@@ -2,122 +2,117 @@
 import rospy
 import pygame
 from geometry_msgs.msg import Twist
+from sensor_msgs.msg import Joy
 
 node_type_name = "/joy_stick_node"
 pub_twist_name = "/tele_op"
-para_joystick_con_name ="/controller_connected"
-para_autonomus_name = "/autonomDrive"
-para_stop_name = "/stopp"
-para_em_stop_name = "/emergancy_stop"
 
-nr_autonomus_button = 1
-nr_stop_button = 2
-nr_em_stop_button = 3
-nr_rot_axis =1
-nr_trans_axsis = 3
+param_config={
+    "joystick_con_name":"/controller_connected",
+    "autonomus_name":"/autonomDrive",
+    "stop_name ":"/stopp",
+    "em_stop_name":"/emergancy_stop"
+}
 
-autonomus_button_old = False
-stop_button_old = False
-em_stop_button_old = False
+button_config={
+    "autonomus_button":1,
+    "stop_button":1,
+    "em_stop_button":1,
+    "rot_axis":1,
+    "trans_axsis":1
+}
+
 
 max_translat_speed = 6 #m/s
 max_rot_speed = 6 #m/s
 
+class joystickinteraktion:
 
-def get_twist_info(Joystick):
+    def __init__(pub_twist_name,button_config,param_config):
+        self.pub_joy = rospy.Publisher(pub_twist_name, Twist, queue_size=10)
+        self.button_config=button_config
+        self.param_config=param_config
+        self.button_old=[0 for i in range(0,10)]
+
+    def set_twist_info(self,Joystick):
+        '''
+        Set Controllinput to /tele_op msg
+        Input: -- initialized Joystick-obj 
+        Output: -- Twist-msg
+        '''
+        msg = Twist()
+        msg.linear.x = Joystick[self.button_config["trans_axsis"]] * max_translat_speed
+        msg.angular.z = Joystick[self.button_config["rot_axis"]] * max_rot_speed
+        rospy.logdebug(str(msg))
+        self.pub_joy.publish(msg)
+
+    def set_param(self,Buttons):
+        '''
+        Set Controllinput to ROS-Param
+        Input: -- initialized Joystick-obj 
+        '''
+
+        if self.button_old[self.button_config["em_stop_button"]] != Buttons[self.button_config["em_stop_button"]] and Buttons[self.button_config["em_stop_button"]] ==1:
+            new_value= not bool(rospy.get_param(self.button_config["em_stop_button"])
+            rospy.set_param(self.param_config["em_stop_name"], str(new_value))
+
+        if self.button_old[self.button_config["stop_button"]] != Buttons[self.button_config["stop_button"]] and Buttons[self.button_config["stop_button"]] ==1:
+            new_value= not bool(rospy.get_param(self.button_config["stop_button"])
+            rospy.set_param(self.param_config["stop_name"], str(new_value))
+
+        if self.button_old[self.button_config["autonomus_button"]] != Buttons[self.button_config["autonomus_button"]] and Buttons[self.button_config["autonomus_button"]] ==1:
+            new_value= not bool(rospy.get_param(self.button_config["autonomus_button"])
+            rospy.set_param(self.param_config["autonomus_name"], str(new_value))
+
+        self.button_old = Buttons
+
+    def get_first_param(self):
     '''
-    Set Controllinput to /tele_op msg
-    Input: -- initialized Joystick-obj 
-    Output: -- Twist-msg
+    Checks if the parameter are published and set the start value
     '''
+    rospy.loginfo("Initial parameter checkup ")
 
-    msg = Twist()
-    msg.linear.x = Joystick.pygame.joystick.get_axis(nr_trans_axsis) * max_translat_speed
-    msg.angular.z = Joystick.pygame.joystick.get_axis(nr_rot_axis) * max_rot_speed
+    if rospy.has_param(para_autonomus_name):
+        self.button_old[self.button_config["autonomus_button"]] = int(rospy.get_param(para_autonomus_name)) 
+    else:
+        rospy.loginfo(para_autonomus_name + "couldn’t be found: Using default Value")
 
-    return msg
+        
+    if rospy.has_param(para_stop_name):
+        self.button_old[self.button_config["stop_button"]] = int(rospy.get_param(para_stop_name))
+    else:
+        rospy.logwarn(para_stop_name + "couldn’t be found: Using default Value")
 
-def set_param(Joystick):
-    '''
-    Set Controllinput to ROS-Param
-    Input: -- initialized Joystick-obj 
-    '''
+        
+    if rospy.has_param(para_em_stop_name):
+        self.button_old[self.button_config["em_stop_button"]] = int(rospy.get_param(para_em_stop_name))
+    else:
+        rospy.logwarn(para_em_stop_name + "couldn’t be found: Using default Value")
 
-    if Joystick.get_button(nr_em_stop_button)==1:
-        em_stop_button_old = not em_stop_button_old
-        rospy.set_param(para_em_stop_name, str(em_stop_button_old))
 
-    if Joystick.get_button(nr_autonomus_button)==1:
-        autonomus_button_old = not autonomus_button_old
-        rospy.set_param(para_autonomus_name, str(autonomus_button_old))
-
-    if Joystick.get_button(nr_stop_button)==1:
-        stop_button_old = not stop_button_old
-        rospy.set_param(para_stop_name, str(stop_button_old))
-
-#def get_first_param():
- #   '''
-  #  Checks if the parameter are published and set the start value
-   # '''
-#
- #   rospy.loginfo("Initial parameter checkup ")
-#
-#
- #   if rospy.has_param(para_autonomus_name):
-  #      autonomus_button_old = rospy.get_param(para_autonomus_name) 
-   # else:
-    #    #rospy.loginfo(para_autonomus_name + "couldn’t be found: Using default Value")
-     #   autonomus_button_old = False
-    #
-    #if rospy.has_param(para_stop_name):
-    #    stop_button_old = rospy.get_param(para_stop_name)
-    #else:
-    #    #rospy.logwarn(para_stop_name + "couldn’t be found: Using default Value")
-    #    stop_button_old = False
-    #    
-    #if rospy.has_param(para_em_stop_name):
-    #    em_stop_button_old = rospy.get_param(para_em_stop_name)
-    #else:
-    #    #rospy.logwarn(para_em_stop_name + "couldn’t be found: Using default Value")
-     #   em_stop_button_old = False
+    def calback(self,joy):
+        '''
+        Calbackfunktinon for Joy_node topic
+        '''
+        set_param(joy.Buttons)
+        set_twist_info(joy.axes)
 
 def main():
     '''
     Main function for Controller integration
     '''
-
-    rospy.loginfo("initial controllerrequest")
-    #initial controllerrequest
-    pygame.pygame.init()
-    while pygame.joystick.get_init() <=0: #check if controller is available
-        pygame.pygame.quit()
-        pygame.pygame.init()
-
-    Joystick = pygame.joystick.Joystick(0)
-    Joystick.init()
-
-    rospy.set_param(para_joystick_con,"True")
-
-    get_first_param()#geting first paramsetting from ROS-network
-
-    pub_joy = rospy.Publisher(pub_twist_name, Twist, queue_size=10)
+    joy_obj =joystickinteraktion(pub_twist_name,button_config,param_config)
+    joy_obj.get_first_param()#geting first paramsetting from ROS-network
     rospy.init_node(node_type_name, anonymous=True)
-    
-    while not rospy.is_shutdown():
-        data = get_twist_info(Joystick)
-        set_param(Joystick)
-        pub_joy.publish(data)        
-        
-    pygame.quit()
+    rospy.Subscriber("/Joy", Joy, joy_obj.calback)
+    rospy.range(50).sleep()
+    rospy.spin()
 
 if __name__ == "__main__":
     try:
         main()   
     except Exception as e:
         rospy.logerr("Error while running joy_stick_node Errorcode:"+str(e))
-
-
-
 
 
 
