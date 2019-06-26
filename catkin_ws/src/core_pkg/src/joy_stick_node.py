@@ -52,17 +52,17 @@ class joystickinteraktion:
         Input: -- initialized Joystick-obj 
         '''
 
-        if self.button_old[self.button_config["em_stop_button"]] != Buttons[self.button_config["em_stop_button"]] and Buttons[self.button_config["em_stop_button"]] ==1:
-            new_value= not bool(rospy.get_param(self.button_config["em_stop_button"])
-            rospy.set_param(self.param_config["em_stop_name"], str(new_value))
+        if self.button_old[self.button_config['em_stop_button']] != Buttons[self.button_config['em_stop_button']] and Buttons[self.button_config['em_stop_button']] ==1:
+            new_value= not bool(rospy.get_param(self.button_config['em_stop_name'])
+            rospy.set_param(self.param_config['em_stop_name'], str(new_value))
 
-        if self.button_old[self.button_config["stop_button"]] != Buttons[self.button_config["stop_button"]] and Buttons[self.button_config["stop_button"]] ==1:
-            new_value= not bool(rospy.get_param(self.button_config["stop_button"])
-            rospy.set_param(self.param_config["stop_name"], str(new_value))
+        if self.button_old[self.button_config['stop_button']] != Buttons[self.button_config['stop_button']] and Buttons[self.button_config['stop_button']] ==1:
+            new_value= not bool(rospy.get_param(self.button_config['stop_name'])
+            rospy.set_param(self.param_config['stop_name'], str(new_value))
 
-        if self.button_old[self.button_config["autonomus_button"]] != Buttons[self.button_config["autonomus_button"]] and Buttons[self.button_config["autonomus_button"]] ==1:
-            new_value= not bool(rospy.get_param(self.button_config["autonomus_button"])
-            rospy.set_param(self.param_config["autonomus_name"], str(new_value))
+        if self.button_old[self.button_config['autonomus_button']] != Buttons[self.button_config['autonomus_button']] and Buttons[self.button_config['autonomus_button']] ==1:
+            new_value= not bool(rospy.get_param(self.button_config['autonomus_name'])
+            rospy.set_param(self.param_config['autonomus_name'], str(new_value))
 
         self.button_old = Buttons
 
@@ -73,21 +73,24 @@ class joystickinteraktion:
     rospy.loginfo("Initial parameter checkup ")
 
     if rospy.has_param(para_autonomus_name):
-        self.button_old[self.button_config["autonomus_button"]] = int(rospy.get_param(para_autonomus_name)) 
+        self.button_old[self.button_config['autonomus_button']] = int(rospy.get_param(self.param_config['autonomus_name'])) 
     else:
         rospy.loginfo(para_autonomus_name + "couldn’t be found: Using default Value")
+	rospy.set_param(self.param_config['autonomus_name'], "False")
 
         
     if rospy.has_param(para_stop_name):
-        self.button_old[self.button_config["stop_button"]] = int(rospy.get_param(para_stop_name))
+        self.button_old[self.button_config['stop_button']] = int(rospy.get_param(self.param_config['stop_name'],))
     else:
         rospy.logwarn(para_stop_name + "couldn’t be found: Using default Value")
+	rospy.set_param(self.param_config['stop_name'], "False")
 
         
     if rospy.has_param(para_em_stop_name):
-        self.button_old[self.button_config["em_stop_button"]] = int(rospy.get_param(para_em_stop_name))
+        self.button_old[self.button_config['em_stop_button']] = int(rospy.get_param(self.param_config['autonomus_name']))
     else:
         rospy.logwarn(para_em_stop_name + "couldn’t be found: Using default Value")
+	rospy.set_param(self.param_config['autonomus_name'], "False")
 
 
     def calback(self,joy):
