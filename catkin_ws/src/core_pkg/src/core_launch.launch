@@ -4,5 +4,6 @@
 
     <node name="core_info_node" pkg="core_pkg" type="core_info_node.py"/>
     <node name="motion_controle_node" pkg="core_pkg" type="motion_controle_node.py"/>
-    <node name="joy_node" pkg="joy" type="joy_node"/>
+    <!--node name="joy_node" pkg="joy" type="joy_node"/-->
+    <node name="tele_operation_node" pkg="core_pkg" type="tele_operation_node.py"/>
 </launch>
