@@ -37,7 +37,7 @@ def check_core_release():
 
 def main():
         pub_core = rospy.Publisher(core_pub_name, Float32, queue_size=10)
-        #pub_memory= rospy.Publisher('/core_info/core_usage', Float32, queue_size=10)
+        
         pub_memory =None
         rospy.init_node(node_type_name, anonymous=True)
         while not rospy.is_shutdown():
