@@ -50,5 +50,4 @@ sudo apt-get install ros-kinetic-joy
 sudo chmod a+rw /dev/input/js0
 sudo apt install python3-pip -y
 python3 -m pip install -U pygame --user
-
 exit 0
