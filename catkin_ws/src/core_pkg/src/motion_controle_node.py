@@ -25,7 +25,7 @@ from geometry_msgs.msg import Twist
 from std_msgs.msg import Float64MultiArray
 
 enable_param = '/motion_controle/simulation_enable'
-node_type_name = 'motion_controle_node'
+node_name = 'motion_controle_node'
 wheel_pub_name = '/motion_controle/wheel_speed'
 x_dot_default = 0.0
 alpha_dot_default = 0.0
@@ -44,37 +44,50 @@ def kinematics(cmd_vel):
     alpha_dot = cmd_vel.angular.z 
     
     #check if join-angle is in Tolerance
-    if True: 
+    if rospy.get_param('/emergancy_stopp',False): 
         phi_dot_r = (x_dot+d*alpha_dot)/R
         phi_dot_l = (x_dot-d*alpha_dot)/R
-    else:
-        #rospy.warn("Circle to small !! Default Values are used!! x_dot: %f alpha_dot:%f",%x_dot_default,%alpha_dot_default)
+    elif rospy.get_param('/emergancy_stopp'):
+        rospy.logerr("Emergency stop is active ")
         phi_dot_r = 0
         phi_dot_l = 0
-
-
+    else:
+        rospy.logerr("Circle to small !! Default Values are used!! x_dot: %s alpha_dot:%s",x_dot_default,alpha_dot_default)
+        phi_dot_r = 0
+        phi_dot_l = 0
     return [phi_dot_l, phi_dot_r]
 
 def listener():
-    rospy.loginfo(R)
-    rospy.loginfo("hallo")
-
-    rospy.init_node(node_type_name,anonymous=True)
-    rospy.Subscriber("/cmd_vel", Twist, calback)
-
-    rospy.spin()
+    rospy.init_node(node_name,anonymous=False)
+    topic_name ='/tele_op'
+    rospy.logdebug("Used Topic: %s", topic_name)
+    while not rospy.is_shutdown():
+        topic_name = check_topic(topic_name)
+        rospy.Subscriber(topic_name, Twist, calback)
         
 def calback(data):
-        phi_dot = kinematics(data)
-        rospy.loginfo(phi_dot)
-        #phi_dot_pub = rospy.Publisher(wheel_pub_name,Float64MultiArray,queue_size=10)
-        #phi_dot_pub.publish(phi_dot)
+    phi_dot = kinematics(data)
+    rospy.logdebug(phi_dot)
 
+def check_topic(old_value):
+    topic_name = '/tele_op'
 
-if __name__=="__main__":
-        try:
-            listener()    
-        except Exception as e:
-                rospy.logerr("Error while running core_info_node: " + str(e))
+    if rospy.get_param('/autonomDrive',False):
+        topic_name = '/cmd_vel'
+    else:
+        topic_name = '/tele_op'
+
+    if topic_name != old_value:
+        rospy.logdebug("Used Topic has changed to: %s", topic_name)
+    
+    return topic_name
+
+try:
+    listener()    
+except rospy.ROSInterruptException as e:
+    rospy.logerr("ROS-Error while runung %s : %s",node_name,str(e))
+
+except Exception as e:
+    rospy.logerr("uncaughed Error while running %s : Errorcode: %s",node_name,str(e))
 
 
