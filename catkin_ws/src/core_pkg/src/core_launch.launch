@@ -1,9 +1,10 @@
 <launch>
     <param name="/core_info/core_info_enable" value="True"/>
-    <param name="/dev/input/js0" value="/dev/input/js0"/>
+    <param name="~dev" value="/dev/input/js0"/>
+    <param name="~coalesce_interval" value="0.05"/>
 
     <node name="core_info_node" pkg="core_pkg" type="core_info_node.py"/>
     <node name="motion_controle_node" pkg="core_pkg" type="motion_controle_node.py"/>
-    <!--node name="joy_node" pkg="joy" type="joy_node"/-->
+    <node name="joy_node" pkg="joy" type="joy_node"/>
     <node name="tele_operation_node" pkg="core_pkg" type="tele_operation_node.py"/>
 </launch>
