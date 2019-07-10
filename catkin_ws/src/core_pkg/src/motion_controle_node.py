@@ -23,10 +23,13 @@
 import rospy
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Float64MultiArray
+from bike_services_pkg.srv import i2c_service
 
 enable_param = '/motion_controle/simulation_enable'
 node_name = 'motion_controle_node'
 wheel_pub_name = '/motion_controle/wheel_speed'
+service_name='i2c_service'
+motor_interface_addr= 42
 x_dot_default = 0.0
 alpha_dot_default = 0.0
 
@@ -67,6 +70,7 @@ def listener():
         
 def calback(data):
     phi_dot = kinematics(data)
+
     rospy.logdebug(phi_dot)
 
 def check_topic(old_value):
@@ -81,6 +85,17 @@ def check_topic(old_value):
         rospy.logdebug("Used Topic has changed to: %s", topic_name)
     
     return topic_name
+
+def send_phi(phi_dots):
+    rospy.wait_for_service(service_name)
+    try:
+        data = "DL"+phi_dots[0]+"R"+phi_dots[1]
+        byte_data =bytearray()
+        byte_data.extend(data)
+        send_data = rospy.ServiceProxy(service_name, i2c_service)
+        resp1 = send_data(True, byte_data,motor_interface_addr)
+    except rospy.ServiceException, e:
+       rospy.logwarn("Service call failed: %s",e)
 
 try:
     listener()    
