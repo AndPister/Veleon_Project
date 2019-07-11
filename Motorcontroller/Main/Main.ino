@@ -18,25 +18,33 @@
 #include <string.h>
 #include <stdio.h>
 
-#define deviceNR 42
+#define deviceNR 0x2a
 #define low_border 50
 #define high_border 200
 #define v_max 10.0
-#define pin_motor_L 5
-#define pin_motor_R 6
+#define pin_motor_L 1
+#define pin_motor_R 7
 
 int range = high_border-low_border;
 float phi_l = 0.0;
 float phi_r = 0.0;
 float param[2];
 bool enable=false;
-
+char resived[32];
+bool new_msg=false;
 void setup() {
   Wire.begin(deviceNR);
   Wire.onReceive(receiveEvent);
+  Serial.begin(9200);
+  pinMode(3,OUTPUT);
 }
 
 void loop() {
+  digitalWrite(3,HIGH);
+  if(new_msg){
+    check_msg(resived);
+    new_msg=false;
+  }
   if (enable){
     analogWrite(pin_motor_L,get_value(phi_l));
     analogWrite(pin_motor_R,get_value(phi_r));
@@ -45,15 +53,20 @@ void loop() {
     analogWrite(pin_motor_L,0);
     analogWrite(pin_motor_R,0);
   }
+  digitalWrite(3,LOW);
 }
 
 void receiveEvent(int anzahl){
-  char receive [32];
+  memset(resived, 0, sizeof(resived));
   int count=0;
+  digitalWrite(3,HIGH);
   while(Wire.available()){
-    receive[count++]=Wire.read();
+    
+    resived[count++]=Wire.read();
   }
-  check_msg(receive);
+  digitalWrite(3,LOW);
+  new_msg=true;
+  //check_msg(resived);
 }
 void check_msg(char receive[]){
   String msgs(receive);
@@ -61,7 +74,7 @@ void check_msg(char receive[]){
   if (msgs.startsWith("E")){
     enable= (bool)msgs[1];
   }
-  else 
+  else if(msgs.startsWith("D"))
   {
     int L = msgs.indexOf("L");
     int R = msgs.indexOf("R");
