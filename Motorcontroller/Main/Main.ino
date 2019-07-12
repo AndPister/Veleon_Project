@@ -13,6 +13,10 @@
  *                    
  *      Beware the Input sequence!!
  *      else the Motor will stop 
+ *      
+ * 
+ * This code is the property of Andreas Pister 
+ * and may not be copied or changed without explicit permission.
  */
 #include <Wire.h>
 #include <string.h>
