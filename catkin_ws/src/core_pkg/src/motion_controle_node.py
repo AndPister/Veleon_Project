@@ -27,8 +27,13 @@ from std_msgs.msg import Float64MultiArray
 enable_param = '/motion_controle/simulation_enable'
 node_name = 'motion_controle_node'
 wheel_pub_name = '/motion_controle/wheel_speed'
+service_name ='i2c_sevice'
+
+adress_motor_left = 0x2a
+adress_motor_right =0x3a
 x_dot_default = 0.0
 alpha_dot_default = 0.0
+accuracy= 3
 
 
 R = 0.503         
@@ -49,12 +54,12 @@ def kinematics(cmd_vel):
         phi_dot_l = (x_dot-d*alpha_dot)/R
     elif rospy.get_param('/emergancy_stopp'):
         rospy.logerr("Emergency stop is active ")
-        phi_dot_r = 0
-        phi_dot_l = 0
+        phi_dot_r = 'F'
+        phi_dot_l = 'F'
     else:
         rospy.logerr("Circle to small !! Default Values are used!! x_dot: %s alpha_dot:%s",x_dot_default,alpha_dot_default)
-        phi_dot_r = 0
-        phi_dot_l = 0
+        phi_dot_r = 0.0
+        phi_dot_l = 0.0
     return [phi_dot_l, phi_dot_r]
 
 def listener():
@@ -64,9 +69,22 @@ def listener():
     while not rospy.is_shutdown():
         topic_name = check_topic(topic_name)
         rospy.Subscriber(topic_name, Twist, calback)
-        
+
+def send_value(phi_dot,address):
+    rospy.wait_for_service(service_name)
+    try:
+        send_data = rospy.ServiceProxy(service_name,i2c_sevice)
+        if type(phi_dot)==float:
+            send_data(True, address,bytearray().extend(round(phi_dot,accuracy)))
+        else:
+            send_data(True, address,bytearray().extend(phi_dot))
+    except rospy.ServiceException as e:
+        rospy.logwarn("Service_call faild: %s",e)
+
 def calback(data):
     phi_dot = kinematics(data)
+    send_value(phi_dot[0],adress_motor_left)
+    send_value(phi_dot[1],adress_motor_right)
     rospy.logdebug(phi_dot)
 
 def check_topic(old_value):
