@@ -144,17 +144,6 @@ def check_topic(old_value):
     
     return topic_name
 
-def send_phi(phi_dots):
-    rospy.wait_for_service(service_name)
-    try:
-        data = "DL"+phi_dots[0]+"R"+phi_dots[1]
-        byte_data =bytearray()
-        byte_data.extend(data)
-        send_data = rospy.ServiceProxy(service_name, i2c_service)
-        resp1 = send_data(True, byte_data,motor_interface_addr)
-    except rospy.ServiceException, e:
-       rospy.logwarn("Service call failed: %s",e)
-
 try:
     listener()    
 except rospy.ROSInterruptException as e:
