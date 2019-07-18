@@ -55,19 +55,19 @@ class generate_ramp():
         elif self.phi_dot < 0 and self.phi_dot_alt < 0:
             self.phi_dot*= -1
             self.phi_dot_alt*= -1
-            return beschleunigung()*-1
+            return accelerationRamp()*-1
         elif self.phi_dot > self.phi_dot_alt:
-            return beschleunigung() 
+            return accelerationRamp() 
         elif self.phi_dot < self.phi_dot_alt:
-            return verzögerung()
+            return deccelerationRamp()
 
-    def beschleunigung(self,sign):
+    def accelerationRamp(self):
         phi_dot_output = self.phi_dot_alt + acceleration*(1/spinningrate)
         if self.phi_dot < phi_dot_output:
             phi_dot_output = self.phi_dot
         return phi_dot_output
 
-    def verzögerung(self):
+    def deccelerationRamp(self):
         phi_dot_output = self.phi_dot_alt - decceleration*(1/spinningrate)
         if self.phi_dot < phi_dot_output:
             phi_dot_output = self.phi_dot
