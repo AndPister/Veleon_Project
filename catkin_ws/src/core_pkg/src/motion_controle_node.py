@@ -40,8 +40,9 @@ x_dot_default = 0.0
 alpha_dot_default = 0.0
 accuracy= 3
 
-beschleunigungsrampe = 0.5
-verzögerungsrampe = 0.5
+
+acceleration = 0.5
+decceleration = 0.5
 phi_dot_alt= [0.000,0.000] # [links,rechts]
 R = 0.503         
 d = 0.77/2
@@ -61,13 +62,13 @@ class generate_ramp():
             return verzögerung()
 
     def beschleunigung(self,sign):
-        phi_dot_output = self.phi_dot_alt + beschleunigungsrampe*(1/spinningrate)
+        phi_dot_output = self.phi_dot_alt + acceleration*(1/spinningrate)
         if self.phi_dot < phi_dot_output:
             phi_dot_output = self.phi_dot
         return phi_dot_output
 
     def verzögerung(self):
-        phi_dot_output = self.phi_dot_alt - verzögerungsrampe*(1/spinningrate)
+        phi_dot_output = self.phi_dot_alt - decceleration*(1/spinningrate)
         if self.phi_dot < phi_dot_output:
             phi_dot_output = self.phi_dot
         return phi_dot_output 
