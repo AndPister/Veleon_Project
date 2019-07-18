@@ -43,16 +43,11 @@ void setup() {
   Wire.onReceive(receiveEvent);
   
   //Encoder 
-  pinMode(enc_green_pin, INPUT_PULLUP);
-  pinMode(enc_white_pin, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(enc_white_pin), countLeft, RISING ); 
-  
   Serial.begin(9200);
 }
 
 void loop() {
- float rmp = encoding();
- 
+
  if (enable){
     analogWrite(pin_motor,get_value(phi_dot));
   }
@@ -67,8 +62,9 @@ void receiveEvent(int value){
   while(Wire.available()){  
     resived[count++]=Wire.read();
   }
-  memcpy(&phi_dot, &resived, sizeof(phi_dot));
-  if(phi_dot<=0) enable=!enable;
+  if(resived[0]=='F') phi_dot=0.000;
+  //else if(resived[0]=='E') enable!= enable;
+  else memcpy(&phi_dot, &resived, sizeof(phi_dot));
   
 }
 
