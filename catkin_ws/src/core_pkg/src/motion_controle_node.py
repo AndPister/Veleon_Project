@@ -50,13 +50,13 @@ class generate_ramp():
     def generate_ramp(self,phi_dot,phi_dot_alt):
         self.phi_dot =phi_dot
         self.phi_dot_alt = phi_dot_alt
-        if self.phi_dot = phi_dot_alt:
+        if self.phi_dot == phi_dot_alt:
             return self.phi_dot
         elif self.phi_dot < 0 and self.phi_dot_alt < 0:
             self.phi_dot*= -1
             self.phi_dot_alt*= -1
             return beschleunigung()*-1
-        elif self.phi_dot> self.phi_dot_alt:
+        elif self.phi_dot > self.phi_dot_alt:
             return beschleunigung() 
         elif self.phi_dot < self.phi_dot_alt:
             return verzögerung()
