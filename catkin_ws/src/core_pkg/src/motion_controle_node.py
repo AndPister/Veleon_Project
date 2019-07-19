@@ -55,11 +55,11 @@ class generate_ramp():
         elif self.phi_dot < 0 and self.phi_dot_alt < 0:
             self.phi_dot*= -1
             self.phi_dot_alt*= -1
-            return accelerationRamp()*-1
+            return self.accelerationRamp()*-1
         elif self.phi_dot > self.phi_dot_alt:
-            return accelerationRamp() 
+            return self.accelerationRamp() 
         elif self.phi_dot < self.phi_dot_alt:
-            return deccelerationRamp()
+            return self.deccelerationRamp()
 
     def accelerationRamp(self):
         phi_dot_output = self.phi_dot_alt + acceleration*(1/spinningrate)
@@ -85,13 +85,7 @@ def kinematics(cmd_vel):
     rampe= generate_ramp()
 
     #check if join-angle is in Tolerance
-    if rospy.get_param('/emergancy_stopp',False): 
-        phi_dot_r = (x_dot+d*alpha_dot)/R
-        phi_dot_l = (x_dot-d*alpha_dot)/R
-        phi_dot_r = rampe.generate_ramp(phi_dot_r,phi_dot_alt[1])
-        phi_dot_l = rampe.generate_ramp(phi_dot_l,phi_dot_alt[0])
-        phi_dot_alt=[phi_dot_l,phi_dot_r]
-    elif rospy.get_param('/emergancy_stopp'):
+    if rospy.get_param('/emergancy_stopp',True):
         rospy.logerr("Emergency stop is active ")
         phi_dot_r = 'F'
         phi_dot_l = 'F'
@@ -99,10 +93,17 @@ def kinematics(cmd_vel):
         phi_dot_r = rampe.generate_ramp(0.0,phi_dot_alt[1])
         phi_dot_l = rampe.generate_ramp(0.0,phi_dot_alt[0])
         phi_dot_alt=[phi_dot_l,phi_dot_r]
-    else:
+    elif False:
         rospy.logerr("Circle to small !! Default Values are used!! x_dot: %s alpha_dot:%s",x_dot_default,alpha_dot_default)
         phi_dot_r = 0.0
         phi_dot_l = 0.0
+    else:
+        phi_dot_r = (x_dot+d*alpha_dot)/R
+        phi_dot_l = (x_dot-d*alpha_dot)/R
+        phi_dot_r = rampe.generate_ramp(phi_dot_r,phi_dot_alt[1])
+        phi_dot_l = rampe.generate_ramp(phi_dot_l,phi_dot_alt[0])
+        phi_dot_alt=[phi_dot_l,phi_dot_r]
+    
     return [phi_dot_l, phi_dot_r]
 
 def listener():
@@ -110,10 +111,14 @@ def listener():
     topic_name ='/tele_op'
     rospy.logdebug("Used Topic: %s", topic_name)
     rate = rospy.Rate(spinningrate)
+    send_value('E',adress_motor_left)
+    send_value('E',adress_motor_right)
     while not rospy.is_shutdown():
         topic_name = check_topic(topic_name)
         rospy.Subscriber(topic_name, Twist, calback)
         rate.sleep()
+    send_value('E',adress_motor_left)
+    send_value('E',adress_motor_right)
 
 def send_value(phi_dot,address):
     rospy.wait_for_service(service_name)
@@ -138,11 +143,9 @@ def check_topic(old_value):
     if rospy.get_param('/autonomDrive',False):
         topic_name = '/cmd_vel'
     else:
-        topic_name = '/tele_op'
-
+        topic_name = '/tele_op'/
     if topic_name != old_value:
         rospy.logdebug("Used Topic has changed to: %s", topic_name)
-    
     return topic_name
 
 try:
