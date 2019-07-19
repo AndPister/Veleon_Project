@@ -143,7 +143,7 @@ def check_topic(old_value):
     if rospy.get_param('/autonomDrive',False):
         topic_name = '/cmd_vel'
     else:
-        topic_name = '/tele_op'/
+        topic_name = '/tele_op'
     if topic_name != old_value:
         rospy.logdebug("Used Topic has changed to: %s", topic_name)
     return topic_name
