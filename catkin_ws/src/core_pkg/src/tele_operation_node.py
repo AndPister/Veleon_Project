@@ -50,7 +50,7 @@ class joystickinteraktion():
     def __init__(self,pub_twist_name,sub_joy_name,button_config,param_config):
         rospy.init_node(node_name,anonymous=False,log_level=rospy.INFO) 
         rospy.Subscriber(sub_joy_name, Joy, self.callback)
-        self.pub_teleop = rospy.Publisher(pub_twist_name, Twist, queue_size=2)
+        self.pub_teleop = rospy.Publisher(pub_twist_name, Twist, queue_size=1)
         self.button_config=button_config
         self.param_config=param_config
         self.button_old=[0 for i in range(0,10)]
@@ -124,6 +124,7 @@ class joystickinteraktion():
     
     def run (self):
         rate=rospy.Rate(20)
+        self.get_first_param()
         while not rospy.is_shutdown():
             rospy.logdebug(self.msg)
             self.pub_teleop.publish(self.msg)
