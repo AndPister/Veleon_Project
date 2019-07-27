@@ -3,7 +3,7 @@
 import serial
 import pandas
 import rospy
-from std_msgs.msg import String
+from msg import GPSDATA_MSG
 
 port = "/dev/ttyACM0"
 
@@ -61,11 +61,11 @@ def decode(coord):
 
 def GPSMAIN ():
 
-    pub     = rospy.Publisher#('string_publish', String, queue_size=10)
-    
-    rate    = rospy.Rate#(2)
+    rospy.init_node("GPS")
 
-    #msg_to_publish = String()
+    pub     = rospy.Publisher#("GPSDATA", GPSDATA_MSG, queue_size=10)
+    
+    rate    = rospy.Rate(2)
 
     while not rospy.is_shutdown():
 	    data = ser.readline()
@@ -76,18 +76,15 @@ def GPSMAIN ():
         if data[0:6] =="$GPGGA":
             parseGPSGGA(data)
 
-        #string_to_publish = "Publishing %d"
-        #msg_to_publish.data = string_to_publish
         pub.publish(#msg_to_publish)
-        rospy.loginfo(#string_to_publish)
+        rospy.loginfo(#msg_to_publish)
 
-        rate.sleep
+        rate.sleep()
 
 
 if __name__== "__main__":
         try:
-        ropy.init_node("GPS")
-        GPSMAIN
+        GPSMAIN()
     except rospy.ROSInterruptException:
         pass
     
