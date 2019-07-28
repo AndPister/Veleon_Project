@@ -1,0 +1,12 @@
+string latRMC
+string dirLatRMC
+string lonRMC
+string dirLonRMC
+int64 speedmsRMC
+string latGGA
+string dirLatGGA
+string lonGGA
+string dirLonGGA
+string GPSqualitGGA
+string usedSatellitesGGA
+string hnnGGA
