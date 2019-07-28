@@ -2,7 +2,7 @@ string latRMC
 string dirLatRMC
 string lonRMC
 string dirLonRMC
-int64 speedmsRMC
+float64 speedmsRMC
 string latGGA
 string dirLatGGA
 string lonGGA
