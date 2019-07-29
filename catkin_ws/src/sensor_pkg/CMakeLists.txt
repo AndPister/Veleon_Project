@@ -53,10 +53,10 @@ find_package(catkin REQUIRED COMPONENTS
  )
 
 ## Generate services in the 'srv' folder
- add_service_files(
-   FILES
-   i2c_service.srv
- )
+#add_service_files(
+#  FILES
+#  i2c_service.srv
+#)
 
 ## Generate actions in the 'action' folder
 # add_action_files(
