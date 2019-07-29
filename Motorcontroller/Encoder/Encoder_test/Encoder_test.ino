@@ -15,16 +15,16 @@
 #define rate 0.05 // detectionrate in s
 #define n_per_Puls 0.01745329251 // 2pi/steps_per_round  //steps_per_round=360
 #define rotation_switch false //if false output Positiv rotaion while rotates right side, else left sides 
+#define transmission 0.25
 
 unsigned int alt=0;   //old encoder counter
 volatile unsigned int value=0;  //aktuell encoder count
 volatile bool signe= true;  //set the sign to value
 int spinningrate =(int) rate*1000; //set rate in ms 
-
+int count=0;
 void setup() {
   Serial.begin(9600);
   pinMode(enc_green_pin, INPUT_PULLUP);
-  pinMode(enc_white_pin, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(enc_white_pin), countLeft, RISING );  
 }
 
@@ -38,7 +38,7 @@ float encoding(){
   float rmp = ((value-alt)/rate)*n_per_Puls;
   value=0; alt= 0;
   if (signe) rmp*=-1;
-  return rmp;
+  return (rmp*transmission);
 }
 void countLeft(){
   if (digitalRead(enc_green_pin)==rotation_switch) signe= true;

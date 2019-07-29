@@ -26,14 +26,17 @@
 #define deviceNR 0x2a
 #define low_border 50
 #define high_border 200
-#define v_max 10.0
-#define pin_motor 1
+#define v_max 3.33
+#define pin_motor 5                       //PWM pin witch the motor is Connected
+#define enable_pin 6                      //Pin witch set the Breakeinput of the Motorconntroller
+#define revered_rotation_pin 7           //Pin witch set the rotationdirection of the motor
 
 //Motorusage
 int range = high_border-low_border;
-volatile float phi_dot = 0.0;
+float phi_dot = 0.0;
 float param[2];
-bool enable = false;
+bool enable =false;
+
 
 
 void setup() {
@@ -47,8 +50,9 @@ void setup() {
 }
 
 void loop() {
-
- if (enable){
+  Serial.println(enable);
+  Serial.println(phi_dot);
+ if (!enable){
     analogWrite(pin_motor,get_value(phi_dot));
   }
   else{
@@ -62,14 +66,17 @@ void receiveEvent(int value){
   while(Wire.available()){  
     resived[count++]=Wire.read();
   }
-  if(resived[0]=='F') phi_dot=0.000;
-  //else if(resived[0]=='E') enable!= enable;
-  else memcpy(&phi_dot, &resived, sizeof(phi_dot));
+  if(resived[0]=='F') 
+    phi_dot=0.000;
+  else if(resived[0]=='E') 
+    enable!= enable;
+  else 
+    memcpy(&phi_dot, &resived, sizeof(phi_dot));
   
 }
 
 int get_value(float phi_dot){
-  int value = (int)(range*v_max/phi_dot)+low_border;
+  float value = (range/phi_dot)*v_max+low_border;
   if (0<value<255) value=0;
   return value;
 }

@@ -38,8 +38,8 @@ volatile bool signe= true;                //set the sign to value
 
 
 //Motorusage
-#define low_border 50                     //lower border witch inicates the lowest voltage when the Motor is aktiv
-#define high_border 200                   //higher border witch inicates the highes voltage when the Motor is aktiv
+#define low_border 80                     //lower border witch inicates the lowest voltage when the Motor is aktiv
+#define high_border 255                   //higher border witch inicates the highes voltage when the Motor is aktiv
 #define v_max 10.0                        //maximum Speed for reference
 #define pin_motor 5                       //PWM pin witch the motor is Connected
 #define enable_pin 6                      //Pin witch set the Breakeinput of the Motorconntroller
@@ -50,9 +50,10 @@ int range = high_border-low_border;       //Constand Value witch indicates the s
 //Velocitycontroller
 #define tt 0.10777    //in s
 #define t1 0.23196    //in s
-#define Ta  0.05     //sampling-time in s
-#define Kp  t1/tt*(1/1)     //proportional
-#define Ki  2*tt                  //
+#define ks 33.065
+#define Ta  0.01    //sampling-time in s
+#define Kp  (t1/tt)*(0.5/ks)  //proportional
+#define Ki  3*tt                  //
 #define Kd  0.5*tt
 float Ki_Ta = Ta*Ki;
 float Kd_Ta = Kd/Ta;
@@ -62,10 +63,16 @@ float esum =0.0;
 
 
 void setup() {
-  
+  Serial.begin(9600);
+  Serial.println(Kp,10);
+  Serial.println(Ki,10);
+  Serial.println(Kd,10);
+  Serial.println(Ki_Ta,10);
+  Serial.println(Kd_Ta,10);
+  Serial.println(Kd,10);
   //i2_c Interface
-  Wire.begin(deviceNR);
-  Wire.onReceive(receiveEvent);
+  //Wire.begin(deviceNR);
+  //Wire.onReceive(receiveEvent);
   
   //Encoder 
   pinMode(enc_green_pin, INPUT_PULLUP);
@@ -75,37 +82,37 @@ void setup() {
   //Motor
   pinMode(enable_pin,OUTPUT);
   pinMode(revered_rotation_pin,OUTPUT);
+  
 }
 
 void loop() {
 
  float rmp = encoding(); 
- float w = phi_dot;
+ float w = 1.0;
  float x = encoding();
- if (enable){
+ /*if (enable){
     analogWrite(pin_motor,get_value(phi_dot));
   }
   else{
     analogWrite(pin_motor,0);
-  }
-  float e = x-w;
+  }*/
+  float e = w-x;
   esum = esum + e;
-  if(esum>high_border) esum = high_border;
-  if(esum<-high_border) esum = -high_border;
+  //if(esum>high_border) esum = high_border;
+  //if(esum<-high_border) esum = -high_border;
   float y = Kp*e + Ki_Ta*esum + Kd_Ta*(e-ealt);
-  ealt = e;
-  
-  if(y<0.0) {
+  ealt = e;  
+  /*if(y<0.0) {
     digitalWrite(revered_rotation_pin,HIGH);
     y*=-1;
   }
-  else digitalWrite(revered_rotation_pin,LOW);
-  
-  analogWrite(pin_motor,(y+low_border));
+  else digitalWrite(revered_rotation_pin,LOW);*/
+  //Serial.println(x);
+  analogWrite(pin_motor,(y));
   delay(Ta);
 }
 
-void receiveEvent(int value){
+/*void receiveEvent(int value){
   char resived[value];
   int count=0;
   while(Wire.available()){  
@@ -114,13 +121,13 @@ void receiveEvent(int value){
   if(resived[0]=='F') phi_dot=0.000;
   else if(resived[0]=='E') enable!= enable;
   //else memcpy(&phi_dot, resived, sizeof(phi_dot));
-}
+}*/
 
-int get_value(float phi_dot){
+/*int get_value(float phi_dot){
   int value = (int)(range*v_max/phi_dot)+low_border;
   if (0<value<255) value=0;
   return value;
-}
+}*/
 
 float encoding(){
   float rmp = ((value-alt)/Ta)*n_per_Puls;
