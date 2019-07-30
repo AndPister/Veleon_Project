@@ -6,14 +6,16 @@ import pandas
 import rospy
 from sensor_pkg.msg import GPSDATA_MSG
 
-port = "/dev/ttyACM0"
+serialport = "/dev/ttyACM0"
+nodename = "GPS"
+topic = "GPSDATA"
+sensorrate = 2
 
 
 def parseGPSRMC(data):
-    #MSGGPS = GPSDATA_MSG()
     sdata = data.split(",")
     if sdata[2] =='V':
-        print ("no sarellite data available")
+        print ("no satellite data available") #entsprechend bei error message ergaenzen
         return
     print ("---Parsing GPRMC---")   
     timeRMC = sdata[1][0:2] + ":" + sdata[1][2:4] + ":" + sdata[1][4:6]
@@ -25,17 +27,12 @@ def parseGPSRMC(data):
     speedmsRMC = float(sdata[7])*0.5144	#Geschw in M/s	
     trCourseRMC = sdata[8]		#True course
     dateRMC = sdata[9][0:2] + "/" + sdata[9][2:4] + "/" + sdata[9][4:6]	#datum
-    #MSGGPS.latRMC = latRMC
-    #MSGGPS.dirLatRMC = dirLatRMC
-    #MSGGPS.lonRMC = lonRMC
-    #MSGGPS.dirLonRMC = dirLonRMC
-    #MSGGPS.speedmsRMC = speedmsRMC
 
-    print ("time : %s, latitude : %s(%s), longitude : %s(%s), speedknoten : %s, speedms : %s, Troue Course : %s, Date : %s"%(timeRMC,latRMC,dirLatRMC,lonRMC,dirLonRMC,speedknotenRMC,speedmsRMC,trCourseRMC,dateRMC))
+
+    #print ("time : %s, latitude : %s(%s), longitude : %s(%s), speedknoten : %s, speedms : %s, Troue Course : %s, Date : %s"%(timeRMC,latRMC,dirLatRMC,lonRMC,dirLonRMC,speedknotenRMC,speedmsRMC,trCourseRMC,dateRMC))
     return True,latRMC,dirLatRMC,lonRMC,dirLonRMC,speedmsRMC
 
 def parseGPSGGA(data):
-        #MSGGPS = GPSDATA_MSG()
         ggadata = data.split(",")
         
         print ("---Parsing GPGGA---")
@@ -44,10 +41,10 @@ def parseGPSGGA(data):
         dirLatGGA = ggadata[3]         #latitude richtung N/S
         lonGGA = decode(ggadata[4])    #longitude
         dirLonGGA = ggadata[5]        #longitude richtung N/S
-        if ggadata[6] == 1 : GPSqualitGGA = 'GPSfix'
-        elif ggadata[6] == 2 : GPSqualitGGA = 'DGPSfix'
-        elif ggadata[6] == 6 : GPSqualitGGA = 'geschaetzt'
-        else  : GPSqualitGGA = 'ungueltig'
+        if ggadata[6] == 1 : GPSqualityGGA = 'GPSfix'
+        elif ggadata[6] == 2 : GPSqualityGGA = 'DGPSfix'
+        elif ggadata[6] == 6 : GPSqualityGGA = 'estimate'
+        else  : GPSqualityGGA = 'invalid'
         usedSatellitesGGA = ggadata[7] #benutzte Satelliten max 12
         dilutopGGA = ggadata[8]        #horizontale abweichung
         hnnGGA = ggadata[9]            #hoehe d antenne ueber geoid
@@ -57,15 +54,7 @@ def parseGPSGGA(data):
         AgeGGA = ggadata[13]           #alter des dgps datensatzes
         RefstatioGGA = ggadata[14]     #dgps referenzstation
         
-
-        #MSGGPS.latGGA = latGGA
-        #MSGGPS.dirLatGGA = dirLatGGA
-        #MSGGPS.lonGGA = lonGGA
-        #MSGGPS.dirLonGGA = dirLongGGA
-        #MSGGPS.GPSqualitGGA = GPSqualitGGA
-        #MSGGPS.usedSatellitesGGA = usedSatellitesGGA
-        #MSGGPS.hnnGGA = hnnGGA
-        return True,latGGA,dirLatGGA,lonGGA,dirLonGGA,GPSqualitGGA,hnnGGA
+        return True,latGGA,dirLatGGA,lonGGA,dirLonGGA,GPSqualityGGA,hnnGGA
 
 def decode(coord):
         #Konvertiert DDDMM.MMMMM zu DD deg MM.MMMMM min
@@ -80,15 +69,15 @@ def decode(coord):
 def GPSMAIN ():
 
     print ("Receiving GPS data")
-    ser = serial.Serial('/dev/ttyACM0', baudrate = 9600, timeout = 0.5)
+    ser = serial.Serial(serialport, baudrate = 9600, timeout = 0.5)
 
     
 
-    rospy.init_node("GPS")
+    rospy.init_node(nodename)
 
-    pub     = rospy.Publisher("GPSDATA", GPSDATA_MSG, queue_size=10)
+    publisher     = rospy.Publisher(topic, GPSDATA_MSG, queue_size=10)
     
-    rate    = rospy.Rate(2)
+    rate    = rospy.Rate(sensorrate)
 
     while not rospy.is_shutdown():
         MSGGPS = GPSDATA_MSG()
@@ -100,6 +89,7 @@ def GPSMAIN ():
         
             #data = data[1:]         #schneidet 'b am anfang ab
             print(data)
+            #if "$GPRMC" in data:
             if data[0:6] =="$GPRMC":
                 jump_out_R,latRMC,dirLatRMC,lonRMC,dirLonRMC,speedmsRMC=parseGPSRMC(data)
                 MSGGPS.latRMC = latRMC
@@ -108,14 +98,15 @@ def GPSMAIN ():
                 MSGGPS.dirLonRMC = dirLonRMC
                 MSGGPS.speedmsRMC = speedmsRMC
             if data[0:6] =="$GPGGA":
-                jump_out_G,latGGA,dirLatGGA,lonGGA,dirLonGGA,GPSqualitGGA,hnnGGA=parseGPSGGA(data)  
+                jump_out_G,latGGA,dirLatGGA,lonGGA,dirLonGGA,GPSqualityGGA,hnnGGA=parseGPSGGA(data)  
                 MSGGPS.latGGA = latGGA
                 MSGGPS.dirLatGGA = dirLatGGA
                 MSGGPS.lonGGA = lonGGA
                 MSGGPS.dirLonGGA = dirLonGGA
-                MSGGPS.GPSqualitGGA = GPSqualitGGA
+                MSGGPS.GPSqualityGGA = GPSqualityGGA
                 MSGGPS.hnnGGA = hnnGGA
-        pub.publish(MSGGPS)
+            #else gpsdatenfehler ueber variable ausgeben => ueber GPSDATA publishen "couldnt find gpsdata"
+        publisher.publish(MSGGPS)
 
         rate.sleep()
 

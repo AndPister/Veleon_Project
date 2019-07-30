@@ -7,5 +7,5 @@ string latGGA
 string dirLatGGA
 string lonGGA
 string dirLonGGA
-string GPSqualitGGA
+string GPSqualityGGA
 string hnnGGA
