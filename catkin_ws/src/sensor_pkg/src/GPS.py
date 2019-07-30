@@ -10,7 +10,7 @@ port = "/dev/ttyACM0"
 
 
 def parseGPSRMC(data):
-    MSGGPS = GPSDATA_MSG()
+    #MSGGPS = GPSDATA_MSG()
     sdata = data.split(",")
     if sdata[2] =='V':
         print ("no sarellite data available")
@@ -25,17 +25,17 @@ def parseGPSRMC(data):
     speedmsRMC = float(sdata[7])*0.5144	#Geschw in M/s	
     trCourseRMC = sdata[8]		#True course
     dateRMC = sdata[9][0:2] + "/" + sdata[9][2:4] + "/" + sdata[9][4:6]	#datum
-    MSGGPS.latRMC = latRMC
-    MSGGPS.dirLatRMC = dirLatRMC
-    MSGGPS.lonRMC = lonRMC
-    MSGGPS.dirLonRMC = dirLonRMC
-    MSGGPS.speedmsRMC = speedmsRMC
+    #MSGGPS.latRMC = latRMC
+    #MSGGPS.dirLatRMC = dirLatRMC
+    #MSGGPS.lonRMC = lonRMC
+    #MSGGPS.dirLonRMC = dirLonRMC
+    #MSGGPS.speedmsRMC = speedmsRMC
 
     print ("time : %s, latitude : %s(%s), longitude : %s(%s), speedknoten : %s, speedms : %s, Troue Course : %s, Date : %s"%(timeRMC,latRMC,dirLatRMC,lonRMC,dirLonRMC,speedknotenRMC,speedmsRMC,trCourseRMC,dateRMC))
-    return MSGGPS,True
+    return True,latRMC,dirLatRMC,lonRMC,dirLonRMC,speedmsRMC
 
 def parseGPSGGA(data):
-        MSGGPS = GPSDATA_MSG()
+        #MSGGPS = GPSDATA_MSG()
         ggadata = data.split(",")
         
         print ("---Parsing GPGGA---")
@@ -43,7 +43,7 @@ def parseGPSGGA(data):
         latGGA = decode(ggadata[2])    #latitude
         dirLatGGA = ggadata[3]         #latitude richtung N/S
         lonGGA = decode(ggadata[4])    #longitude
-        dirLongGGA = ggadata[5]        #longitude richtung N/S
+        dirLonGGA = ggadata[5]        #longitude richtung N/S
         if ggadata[6] == 1 : GPSqualitGGA = 'GPSfix'
         elif ggadata[6] == 2 : GPSqualitGGA = 'DGPSfix'
         elif ggadata[6] == 6 : GPSqualitGGA = 'geschaetzt'
@@ -58,14 +58,14 @@ def parseGPSGGA(data):
         RefstatioGGA = ggadata[14]     #dgps referenzstation
         
 
-        MSGGPS.latGGA = latGGA
-        MSGGPS.dirLatGGA = dirLatGGA
-        MSGGPS.lonGGA = lonGGA
-        MSGGPS.dirLonGGA = dirLongGGA
-        MSGGPS.GPSqualitGGA = GPSqualitGGA
-        MSGGPS.usedSatellitesGGA = usedSatellitesGGA
-        MSGGPS.hnnGGA = hnnGGA
-        return MSGGPS,True
+        #MSGGPS.latGGA = latGGA
+        #MSGGPS.dirLatGGA = dirLatGGA
+        #MSGGPS.lonGGA = lonGGA
+        #MSGGPS.dirLonGGA = dirLongGGA
+        #MSGGPS.GPSqualitGGA = GPSqualitGGA
+        #MSGGPS.usedSatellitesGGA = usedSatellitesGGA
+        #MSGGPS.hnnGGA = hnnGGA
+        return True,latGGA,dirLatGGA,lonGGA,dirLonGGA,GPSqualitGGA,hnnGGA
 
 def decode(coord):
         #Konvertiert DDDMM.MMMMM zu DD deg MM.MMMMM min
@@ -74,7 +74,7 @@ def decode(coord):
         tail = x[1]
         deg = head[0:-2]
         min = head[-2:]
-        return (deg + "/" + min + "." + tail + "min")
+        return (deg + "." + min + "." + tail + "min")
 
 
 def GPSMAIN ():
@@ -88,7 +88,7 @@ def GPSMAIN ():
 
     pub     = rospy.Publisher("GPSDATA", GPSDATA_MSG, queue_size=10)
     
-    rate    = rospy.Rate(1)
+    rate    = rospy.Rate(2)
 
     while not rospy.is_shutdown():
         MSGGPS = GPSDATA_MSG()
@@ -101,10 +101,20 @@ def GPSMAIN ():
             #data = data[1:]         #schneidet 'b am anfang ab
             print(data)
             if data[0:6] =="$GPRMC":
-                MSGGPS,jump_out_R=parseGPSRMC(data)
+                jump_out_R,latRMC,dirLatRMC,lonRMC,dirLonRMC,speedmsRMC=parseGPSRMC(data)
+                MSGGPS.latRMC = latRMC
+                MSGGPS.dirLatRMC = dirLatRMC
+                MSGGPS.lonRMC = lonRMC
+                MSGGPS.dirLonRMC = dirLonRMC
+                MSGGPS.speedmsRMC = speedmsRMC
             if data[0:6] =="$GPGGA":
-                MSGGPS,jump_out_G=parseGPSGGA(data)
-
+                jump_out_G,latGGA,dirLatGGA,lonGGA,dirLonGGA,GPSqualitGGA,hnnGGA=parseGPSGGA(data)  
+                MSGGPS.latGGA = latGGA
+                MSGGPS.dirLatGGA = dirLatGGA
+                MSGGPS.lonGGA = lonGGA
+                MSGGPS.dirLonGGA = dirLonGGA
+                MSGGPS.GPSqualitGGA = GPSqualitGGA
+                MSGGPS.hnnGGA = hnnGGA
         pub.publish(MSGGPS)
 
         rate.sleep()

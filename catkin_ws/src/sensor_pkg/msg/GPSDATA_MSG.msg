@@ -8,5 +8,4 @@ string dirLatGGA
 string lonGGA
 string dirLonGGA
 string GPSqualitGGA
-string usedSatellitesGGA
 string hnnGGA
