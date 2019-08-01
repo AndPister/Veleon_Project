@@ -1,18 +1,18 @@
-#include <PID_v1.h>
+
 
 #define tt 0.10777    //in s
 #define t1 0.23196    //in s
 #define ks 33.065
 #define Ta  0.05    //sampling-time in s
-#define Kp  (t1/tt)*(255/ks)  //proportional
-#define Ki  Kp/(15.4*tt)                 //
-#define Kd  0.2*tt *Kp
+#define Kp  (t1/tt)*(245/ks)  //proportional
+#define Ki  Kp/(14*tt)                //
+#define Kd  0//0.2*tt *Kp
 
 //Define Variables we'll be connecting to
 double Setpoint, Input, Output;
 
 //Specify the links and initial tuning parameters
-PID myPID(&Input, &Output, &Setpoint,Kp,Ki,Kd, DIRECT);
+//PID myPID(&Input, &Output, &Setpoint,Kp,Ki,Kd, DIRECT);
 
 
 //encoder 
@@ -44,7 +44,7 @@ void loop()
   analogWrite(5,Output);
   Serial.println(Input);*/
 
-  float w = 3;
+  float w = 1.5;
   float x = encoding();
   float e = w-x;
   esum = esum + e;
@@ -55,7 +55,7 @@ void loop()
   ealt = e;  
   analogWrite(5,y);
   Serial.println(x);
-  delay((int)Ta*1000);
+  delay((int)Ta*1000*2);
 }
 
 
