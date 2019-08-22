@@ -3,7 +3,7 @@
 
 import rospy
 from sensor_pkg.msg import USMOD_MSG
-#from bike_service_pkg.srv import i2c_service
+from bike_service_pkg.srv import i2c_service
 
 adress_nano_1 = 0x10a
 adress_nano_2 = 0x11a
