@@ -14,13 +14,11 @@ cmd =0x0a
 bus = smbus.SMBus(bus_registration)
 
 def service_handler(req):
-    rate= rospy.Rate(10)
     if req.send_true:     
         send_data(req)
     else:
         read_data(req)
     
-    rate.sleep()
     return 
 
 def send_data(req):
