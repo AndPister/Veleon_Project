@@ -1,0 +1,3 @@
+<launch>
+    <node name="i2c_service_node" pkg="bike_services_pkg" type="i2c_service_node.py"/>
+</launch>
