@@ -8,7 +8,7 @@ import smbus
 server_node_name= 'i2c_service_server'
 service_name='i2c_service'
 bus_registration=1
-cmd =0x0a
+cmd =10
 
 
 bus = smbus.SMBus(bus_registration)
@@ -17,19 +17,24 @@ def service_handler(req):
     if req.send_true:     
         send_data(req)
     else:
-        read_data(req)
-    
-    return 
+        i2c_Response=i2c_service()
+        i2c_Response.resdata=read_data(req)
+        
+    return i2c_Response.resdata
 
 def send_data(req):
+    print("sendet")
     bus.write_i2c_block_data(req.deviceID, cmd,req.reqdata)
     return 
 
 def read_data(req):
+    print("empfaengt")
     response = bus.read_i2c_block_data(req.deviceID, cmd)
+    print(response)
     return response
     
 def main():
+    print("startet")
     rospy.init_node(server_node_name)
     s = rospy.Service(service_name,i2c_service,service_handler)
     rospy.spin()

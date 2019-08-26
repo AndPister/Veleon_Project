@@ -3,10 +3,10 @@
 
 import rospy
 from sensor_pkg.msg import USMOD_MSG
-from bike_service_pkg.srv import i2c_service
+from bike_services_pkg.srv import i2c_service
 
-adress_nano_1 = 0x10a
-adress_nano_2 = 0x11a
+adress_nano_1 = 0x3a
+#adress_nano_2 = 0x4a
 nodename = "USMOD"
 topic = "USMODDATA"
 
@@ -16,19 +16,21 @@ def USMODMAIN():
     rospy.init_node(nodename)
     rate = rospy.Rate(20)
     rospy.wait_for_service('i2c_service')
-    trigger1 = rospy.ServiceProx('i2c_service',i2c_service)
-    trigger2 = rospy.ServiceProx('i2c_service',i2c_service)
+    trigger1 = rospy.ServiceProxy('i2c_service',i2c_service)
+    #trigger2 = rospy.ServiceProxy('i2c_service',i2c_service)
 
-    publisher = rospy.Publisher(topic, USMOD_MSG)
+    publisher = rospy.Publisher(topic, USMOD_MSG,queue_size=10)
 
     while not rospy.is_shutdown():
         USMODDATA = USMOD_MSG()
-        trigger1(FALSE,adress_nano_1)
-        return trigger1.resdata
-        USMODDATA.Sensordaten1 = trigger1.resdata
-        trigger2(FALSE,adress_nano_2)
-        return trigger2.resdata
-        USMODDATA.Sesnordaten2 = trigger2.resdata
+        antwort = trigger1(False,adress_nano_1,bytearray())
+        antwort1 = antwort.resdata
+        print(antwort1)
+        USMODDATA.Sensordaten1 = antwort1
+        #trigger2(False,adress_nano_2,bytearray(0))
+        #return trigger2.resdata
+        #USMODDATA.Sesnordaten2 = trigger2.resdata
+
 
         publisher.publish(USMODDATA)
 
@@ -41,7 +43,7 @@ def USMODMAIN():
 
 
 if __name__== "__main__":
-        try:
+    try:
         USMODMAIN()
     except rospy.ROSInterruptException:
         pass

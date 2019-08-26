@@ -1,2 +1,2 @@
-Int64[] Sensordaten1
-Int64[] Sensordaten2
+int8[] Sensordaten1
+int8[] Sensordaten2
