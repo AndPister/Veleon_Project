@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import rospy
-from bike_services_pkg.srv import i2c_service
+from bike_services_pkg.srv import i2c_service, i2c_serviceResponse
 import smbus
 
 server_node_name= 'i2c_service_server'
@@ -14,13 +14,14 @@ cmd =10
 bus = smbus.SMBus(bus_registration)
 
 def service_handler(req):
+    print(type(req))
     if req.send_true:     
         send_data(req)
     else:
-        i2c_Response=i2c_service()
-        i2c_Response.resdata=read_data(req)
+        res=read_data(req)
+        print(res)
         
-    return i2c_Response.resdata
+    return i2c_serviceResponse(res)
 
 def send_data(req):
     print("sendet")
@@ -30,7 +31,8 @@ def send_data(req):
 def read_data(req):
     print("empfaengt")
     response = bus.read_i2c_block_data(req.deviceID, cmd)
-    print(response)
+    #print(response)
+    print(type(response))
     return response
     
 def main():
