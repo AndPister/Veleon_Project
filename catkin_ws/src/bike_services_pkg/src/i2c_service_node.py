@@ -4,6 +4,7 @@
 import rospy
 from bike_services_pkg.srv import i2c_service, i2c_serviceResponse
 import smbus
+import time
 
 server_node_name= 'i2c_service_server'
 service_name='i2c_service'
@@ -12,9 +13,9 @@ cmd =10
 
 
 bus = smbus.SMBus(bus_registration)
+time.sleep(1) #wait here to avoid error121
 
 def service_handler(req):
-    print(type(req))
     if req.send_true:     
         send_data(req)
     else:
@@ -31,7 +32,6 @@ def send_data(req):
 def read_data(req):
     print("empfaengt")
     response = bus.read_i2c_block_data(req.deviceID, cmd)
-    #print(response)
     print(type(response))
     return response
     
