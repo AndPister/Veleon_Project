@@ -4,6 +4,7 @@
 import rospy
 from sensor_pkg.msg import USMOD_MSG
 from bike_services_pkg.srv import i2c_service
+import time
 
 adress_nano_1 = 0x3a
 adress_nano_2 = 0x4a
@@ -36,6 +37,7 @@ def USMODMAIN():
             rospy.logwarn("Service_call failed: %s",e)
 
         rospy.wait_for_service('i2c_service')
+        time.sleep(0.5)
         try:
             antwort2 = trigger2(False,adress_nano_2,bytearray(0))
             antwort2 = antwort2.resdata
@@ -44,15 +46,15 @@ def USMODMAIN():
             USMODDATA.Sensordaten2 = ant2
         except rospy.ServiceException as e:
             rospy.logwarn("Service_call failed: %s",e)
-        #rospy.wait_for_service('i2c_service')
-        #try:
-            #antwort3 = trigger3(False,adress_nano_3,bytearray(0))
-            #antwort3 = antwort3.resdata
-            #ant3=antwort3[0:1]
-            #print(ant3)
-            #USMODDATA.SensordatenVorne = ant3
-        #except rospy.ServiceException as e:
-            #rospy.logwarn("Service_call failed: %s",e)
+        rospy.wait_for_service('i2c_service')
+        try:
+            antwort3 = trigger3(False,adress_nano_3,bytearray(0))
+            antwort3 = antwort3.resdata
+            ant3=antwort3[0:2]
+            print(ant3)
+            USMODDATA.SensordatenVorne = ant3
+        except rospy.ServiceException as e:
+            rospy.logwarn("Service_call failed: %s",e)
             
 
 
