@@ -16,17 +16,19 @@ bus = smbus.SMBus(bus_registration)
 time.sleep(1) #wait here to avoid error121
 
 def service_handler(req):
+    
     if req.send_true:     
         send_data(req)
     else:
         res=read_data(req)
         print(res)
-        
-    return i2c_serviceResponse(res)
+        return i2c_serviceResponse(res)
+    return 
 
 def send_data(req):
-    print("sendet")
-    bus.write_i2c_block_data(req.deviceID, cmd,req.reqdata)
+    print("sende")
+    test=[i for i in bytearray(req.reqdata)]
+    bus.write_i2c_block_data(req.deviceID, cmd,test)
     return 
 
 def read_data(req):
