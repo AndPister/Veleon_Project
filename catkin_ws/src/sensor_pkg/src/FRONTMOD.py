@@ -19,7 +19,7 @@ def setservo(Servopos):
     rospy.wait_for_service('i2c_service')
     try:
         send_value = rospy.ServiceProxy('i2c_service',i2c_service)
-        if(Servopos >= 0 & Servopos <=180):
+        if(Servopos >= 0 and Servopos <=180):
             pos_data=[i for i in bytearray(struct.pack("i",Servopos))]
             print(type(pos_data))
             print(pos_data)

@@ -1,5 +1,5 @@
 bool send_true
 int8 deviceID
-int8[] reqdata
+int16[] reqdata
 ---
 int16[] resdata

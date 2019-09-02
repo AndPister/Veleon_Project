@@ -3,7 +3,7 @@
 
 import rospy
 from std_msgs.msg import Int16
-Servoposition = 85
+Servoposition = 90
 
 def ServopositionPubMAIN():
     rospy.init_node("ServopositionPub")
