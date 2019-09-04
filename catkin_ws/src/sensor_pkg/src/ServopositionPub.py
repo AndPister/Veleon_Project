@@ -5,6 +5,7 @@ import rospy
 from std_msgs.msg import Int16
 Servoposition = 90
 
+
 def ServopositionPubMAIN():
     rospy.init_node("ServopositionPub")
     publisher = rospy.Publisher("ServoPosition",Int16,queue_size=10)
