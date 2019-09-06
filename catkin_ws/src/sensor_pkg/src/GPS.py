@@ -1,6 +1,24 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+#########################################################################
+#Project:       Veleon-Project
+#Subproject:    Low-Budget Sensors 
+#Autor:         Richard Bahmann
+#Date:          12.07.19
+#
+#Discription:   This Node reads GPS data from the Serial connection /dev/ttyACM0 
+#                     Filters for RMC and GGA data and publishes it.
+#               
+#
+#Input:           None
+#                
+#                   
+#Output:        Lat and Long of the System,speed in m/s, height: from GGA and RMC data. topic: GPSDATA
+#                    
+#                   
+#########################################################################
+
 import serial
 import pandas
 import rospy
@@ -10,13 +28,15 @@ serialport = "/dev/ttyACM0"
 nodename = "GPS"
 topic = "GPSDATA"
 sensorrate = 2
+no_gps_signal = False
 
 
 def parseGPSRMC(data):
     sdata = data.split(",")
     if sdata[2] =='V':
         print ("no satellite data available") #entsprechend bei error message ergaenzen
-        return
+        no_gps_signal = True
+        return True,0,0,0,0,0
     print ("---Parsing GPRMC---")   
     timeRMC = sdata[1][0:2] + ":" + sdata[1][2:4] + ":" + sdata[1][4:6]
     latRMC = decode(sdata[3])	#latitude
@@ -33,28 +53,31 @@ def parseGPSRMC(data):
     return True,latRMC,dirLatRMC,lonRMC,dirLonRMC,speedmsRMC
 
 def parseGPSGGA(data):
-        ggadata = data.split(",")
+    ggadata = data.split(",")
         
-        print ("---Parsing GPGGA---")
-        timeGGA = ggadata[1][0:2] + ":" + ggadata[1][2:4] + ":" + ggadata[1][4:6] + ggadata[1][7:8] #zeit utc mal auf sekunden achten
-        latGGA = decode(ggadata[2])    #latitude
-        dirLatGGA = ggadata[3]         #latitude richtung N/S
-        lonGGA = decode(ggadata[4])    #longitude
-        dirLonGGA = ggadata[5]        #longitude richtung N/S
-        if ggadata[6] == 1 : GPSqualityGGA = 'GPSfix'
-        elif ggadata[6] == 2 : GPSqualityGGA = 'DGPSfix'
-        elif ggadata[6] == 6 : GPSqualityGGA = 'estimate'
-        else  : GPSqualityGGA = 'invalid'
-        usedSatellitesGGA = ggadata[7] #benutzte Satelliten max 12
-        dilutopGGA = ggadata[8]        #horizontale abweichung
-        hnnGGA = ggadata[9]            #hoehe d antenne ueber geoid
-        hnneinGGA = ggadata[10]        #einheit d antennenhoehe
-        goisepGGA = ggadata[11]        #geoidal seperation
-        goisepeinGGA = ggadata[12]     #einheit geoidal sep
-        AgeGGA = ggadata[13]           #alter des dgps datensatzes
-        RefstatioGGA = ggadata[14]     #dgps referenzstation
+    print ("---Parsing GPGGA---")
+    if no_gps_signal:
+        print ("no satellite data available")
+        return True,0,0,0,0,0
+    timeGGA = ggadata[1][0:2] + ":" + ggadata[1][2:4] + ":" + ggadata[1][4:6] + ggadata[1][7:8] #zeit utc mal auf sekunden achten
+    latGGA = decode(ggadata[2])    #latitude
+    dirLatGGA = ggadata[3]         #latitude richtung N/S
+    lonGGA = decode(ggadata[4])    #longitude
+    dirLonGGA = ggadata[5]        #longitude richtung N/S
+    if ggadata[6] == 1 : GPSqualityGGA = 'GPSfix'
+    elif ggadata[6] == 2 : GPSqualityGGA = 'DGPSfix'
+    elif ggadata[6] == 6 : GPSqualityGGA = 'estimate'
+    else  : GPSqualityGGA = 'invalid'
+    usedSatellitesGGA = ggadata[7] #benutzte Satelliten max 12
+    dilutopGGA = ggadata[8]        #horizontale abweichung
+    hnnGGA = ggadata[9]            #hoehe d antenne ueber geoid
+    hnneinGGA = ggadata[10]        #einheit d antennenhoehe
+    goisepGGA = ggadata[11]        #geoidal seperation
+    goisepeinGGA = ggadata[12]     #einheit geoidal sep
+    AgeGGA = ggadata[13]           #alter des dgps datensatzes
+    RefstatioGGA = ggadata[14]     #dgps referenzstation
         
-        return True,latGGA,dirLatGGA,lonGGA,dirLonGGA,GPSqualityGGA,hnnGGA
+    return True,latGGA,dirLatGGA,lonGGA,dirLonGGA,GPSqualityGGA,hnnGGA
 
 def decode(coord):
         #Konvertiert DDDMM.MMMMM zu DD deg MM.MMMMM min
@@ -64,6 +87,7 @@ def decode(coord):
         deg = head[0:-2]
         min = head[-2:]
         return (deg + "." + min + "." + tail + "min")
+
 
 
 def GPSMAIN ():
@@ -91,21 +115,26 @@ def GPSMAIN ():
             print(data)
             #if "$GPRMC" in data:
             if data[0:6] =="$GPRMC":
-                jump_out_R,latRMC,dirLatRMC,lonRMC,dirLonRMC,speedmsRMC=parseGPSRMC(data)
-                MSGGPS.latRMC = latRMC
-                MSGGPS.dirLatRMC = dirLatRMC
-                MSGGPS.lonRMC = lonRMC
-                MSGGPS.dirLonRMC = dirLonRMC
-                MSGGPS.speedmsRMC = speedmsRMC
+                try:
+                    jump_out_R,latRMC,dirLatRMC,lonRMC,dirLonRMC,speedmsRMC=parseGPSRMC(data)
+                    MSGGPS.latRMC = latRMC
+                    MSGGPS.dirLatRMC = dirLatRMC
+                    MSGGPS.lonRMC = lonRMC
+                    MSGGPS.dirLonRMC = dirLonRMC
+                    MSGGPS.speedmsRMC = speedmsRMC
+                except:
+                    rospy.logwarn("invalid RMC data")
             if data[0:6] =="$GPGGA":
-                jump_out_G,latGGA,dirLatGGA,lonGGA,dirLonGGA,GPSqualityGGA,hnnGGA=parseGPSGGA(data)  
-                MSGGPS.latGGA = latGGA
-                MSGGPS.dirLatGGA = dirLatGGA
-                MSGGPS.lonGGA = lonGGA
-                MSGGPS.dirLonGGA = dirLonGGA
-                MSGGPS.GPSqualityGGA = GPSqualityGGA
-                MSGGPS.hnnGGA = hnnGGA
-            #else gpsdatenfehler ueber variable ausgeben => ueber GPSDATA publishen "couldnt find gpsdata"
+                try:
+                    jump_out_G,latGGA,dirLatGGA,lonGGA,dirLonGGA,GPSqualityGGA,hnnGGA=parseGPSGGA(data)  
+                    MSGGPS.latGGA = latGGA
+                    MSGGPS.dirLatGGA = dirLatGGA
+                    MSGGPS.lonGGA = lonGGA
+                    MSGGPS.dirLonGGA = dirLonGGA
+                    MSGGPS.GPSqualityGGA = GPSqualityGGA
+                    MSGGPS.hnnGGA = hnnGGA
+                except:
+                    rospy.logwarn("invalid GGA data")
         publisher.publish(MSGGPS)
 
         rate.sleep()

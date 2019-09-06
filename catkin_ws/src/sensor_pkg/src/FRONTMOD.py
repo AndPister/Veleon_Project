@@ -1,6 +1,24 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+#########################################################################
+#Project:       Veleon-Project
+#Subproject:    Low-Budget Sensors
+#Autor:         Richard Bahmann
+#Date:          17.08.19
+#
+#Discription:   Node covers the steering of the servomotor at the Front of the Veleon-Bike
+#                     uses I2C
+#                     accepts 10 to 170 degree only
+#
+#Input:         Reads servo position from topic: ServoPosition
+#                
+#                   
+#Output:        None
+#                   
+#                   
+#########################################################################
+
 import rospy
 import struct
 from std_msgs.msg import Int16

@@ -1,6 +1,24 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+#########################################################################
+#Project:       Veleon-Project
+#Subproject:    Low-Budget Sensors
+#Autor:         Richard Bahmann
+#Date:          01.08.19
+#
+#Discription:   Node covers the reading of the ultrasonic sensors of the Veleon-Bike.
+#                     It also transform the coordinates relative to the module center point
+#                     uses I2C
+#
+#Input:         None
+#                
+#                   
+#Output:        Ultrasonic data in both forms: transforme and not transformed in USMODDATA
+#                   
+#                   
+#########################################################################
+
 import rospy
 import math
 from sensor_pkg.msg import USMOD_MSG
@@ -15,6 +33,17 @@ topic = "USMODDATA"
 
 Sin_6_degree = (math.sin(6*math.pi/180))
 Cos_6_degree = (math.cos(6*math.pi/180))
+
+#Transformation of the coord is set to the acrylic glass exponator and has to be adjusted to the constructed housing, if ever printed.
+#degree can easily be changed above. recommended to add needed degrees like above for easier use.
+#Data comes like this:
+#       ____________________________________
+#       |    2   |    3   |               |    6   |    7   |
+#       |    1   |    4   |               |    5   |    8   |
+#
+#       ant      (7|8|6|5)
+#       ant2    (3|4|2|1)
+
 
 def Koordtransformback1(Koord):
     Measurement1 = [Cos_6_degree*Koord[3]-0.455,Sin_6_degree*-1*Koord[3]-14.68,Sin_6_degree*-1*Koord[3]-5.989] 
@@ -52,7 +81,7 @@ def USMODMAIN():
             antwort1 = antwort.resdata
             ant=antwort1[0:4]
             #print(type(ant))
-            #print(ant)
+            print(ant)
             
             M5,M6,M7,M8=Koordtransformback2(ant)
             #print("5-8")
@@ -82,7 +111,7 @@ def USMODMAIN():
             #print(M2)
             #print(M3)
             #print(M4)
-            #print(ant2)
+            print(ant2)
             USMODDATA.Measurement1 = M1
             USMODDATA.Measurement2 = M2
             USMODDATA.Measurement3 = M3
@@ -98,9 +127,9 @@ def USMODMAIN():
 
             Mfr,Mfl=Koordtransformfront(ant3)
 
-            print("front")
-            print(Mfr)
-            print(Mfl)
+            #print("front")
+            #print(Mfr)
+            #print(Mfl)
             
             print(ant3)
             USMODDATA.SensordatenVorne = ant3
@@ -114,9 +143,6 @@ def USMODMAIN():
 
         rate.sleep()
 
-
-#i2c_service SERVER muss noch antworten koennen. muss hinyugefuegt werrden !!!!!11
-#prolly return i2c_serviceResponse
 
 
 if __name__== "__main__":

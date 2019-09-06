@@ -1,6 +1,24 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+#########################################################################
+#Project:       Veleon-Project
+#Subproject:    Low-Budget Sensors
+#Autor:         Richard Bahmann
+#Date:          01.09.19
+#
+#Discription: simple publisher that publishes into ServoPositio.
+#                   10 to 170 degree only
+#                     
+#
+#Input:         None
+#                
+#                   
+#Output:      Servoposition in topic ServoPosition
+#                   
+#                   
+#########################################################################
+
 import rospy
 from std_msgs.msg import Int16
 Servoposition = 90
